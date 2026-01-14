@@ -3,245 +3,514 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prowler Premium | Online Dashboard</title>
+    <title>Prowler Premium | Dashboard</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
         :root { 
-            --bg: #0b0e1a; 
-            --card: #151929; 
-            --accent: #4682ff; 
-            --accent-glow: rgba(70, 130, 255, 0.4); 
-            --text: #ffffff; 
-            --text-dim: #7a8499; 
-            --success: #00ff88; 
-            --error: #ff4444; 
-            --warning: #ffaa00;
+            --bg-primary: #0a0d16;
+            --bg-secondary: #12151f;
+            --bg-card: #1a1d2e;
+            --bg-elevated: #21243a;
+            --accent: #4a8cff;
+            --accent-hover: #5c9dff;
+            --accent-glow: rgba(74, 140, 255, 0.4);
+            --success: #34d399;
+            --success-glow: rgba(52, 211, 153, 0.3);
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
         body { 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #0f1218 50%, var(--bg-primary) 100%);
+            color: var(--text-primary); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
-            padding: 20px; 
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
         }
 
-        .loader-card { 
-            background: var(--card); 
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, rgba(74, 140, 255, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(124, 92, 255, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .dashboard-container { 
+            position: relative;
+            z-index: 1;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
             width: 100%; 
-            max-width: 450px; 
-            padding: 40px; 
-            border-radius: 24px; 
-            text-align: center; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7); 
-            border: 1px solid rgba(255,255,255,0.03); 
+            max-width: 520px; 
+            padding: 48px 40px;
+            border-radius: 28px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7),
+                        0 0 0 1px var(--border);
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        h1 { 
-            font-size: 32px; 
-            letter-spacing: 4px; 
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* HEADER */
+        .header { 
+            text-align: center; 
+            margin-bottom: 40px;
+        }
+
+        .logo { 
+            font-size: 42px; 
             font-weight: 800; 
-            background: linear-gradient(135deg, #4682ff 0%, #7c5cff 100%); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            margin-bottom: 5px;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, var(--accent) 0%, #7c5cff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            text-shadow: 0 0 40px var(--accent-glow);
         }
 
         .subtitle { 
-            color: var(--text-dim); 
-            font-size: 10px; 
-            margin-bottom: 30px; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
+            color: var(--text-dim);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
         }
 
-        /* Indicateur de connexion locale pour le site en ligne */
-        .conn-status {
-            font-size: 10px;
-            padding: 8px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
+        /* CONNECTION STATUS */
+        .connection-status {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
         }
 
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online {
+            background: var(--success);
+            box-shadow: 0 0 12px var(--success-glow);
+        }
+
+        .status-indicator.offline {
+            background: var(--error);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* USER INFO */
         .user-info { 
-            background: rgba(0,0,0,0.2); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            border-radius: 16px; 
-            padding: 18px; 
-            margin-bottom: 25px; 
-            text-align: left; 
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
         }
 
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .info-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 12px 0;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
 
-        .btn-stack { display: flex; flex-direction: column; gap: 12px; }
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-row:first-child {
+            padding-top: 0;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .badge-offline {
+            background: rgba(107, 114, 128, 0.15);
+            color: var(--text-dim);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        /* BUTTONS */
+        .action-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+        }
 
         button { 
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid rgba(255,255,255,0.08); 
-            color: var(--text); 
-            padding: 18px; 
-            border-radius: 14px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 12px; 
-            width: 100%; 
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 18px 24px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover:not(:disabled)::before {
+            left: 100%;
         }
 
         button:hover:not(:disabled) { 
-            background: var(--accent); 
-            box-shadow: 0 0 20px var(--accent-glow); 
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px var(--accent-glow);
+            transform: translateY(-2px);
         }
 
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
 
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
-        .active-dot { background: var(--success) !important; box-shadow: 0 0 10px var(--success); }
-        .waiting-dot { background: var(--warning) !important; box-shadow: 0 0 10px var(--warning); }
+        button:disabled { 
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-        .game-selector { 
+        button.loaded {
+            background: linear-gradient(135deg, var(--success) 0%, #10b981 100%);
+            border-color: var(--success);
+            box-shadow: 0 8px 20px var(--success-glow);
+        }
+
+        button.waiting {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            animation: pulseButton 2s infinite;
+        }
+
+        @keyframes pulseButton {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* GAME SELECTOR */
+        .game-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-top: 10px;
+            gap: 14px;
+            margin-bottom: 20px;
         }
 
         .game-card { 
-            background: rgba(255,255,255,0.02); 
-            border: 2px solid rgba(255,255,255,0.05); 
-            padding: 15px; 
-            border-radius: 16px; 
-            cursor: pointer; 
-            transition: 0.3s;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            padding: 24px 16px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+            position: relative;
         }
 
-        .game-card.selected { border-color: var(--accent); background: rgba(70, 130, 255, 0.1); }
-
-        .log-area { 
-            margin-top: 25px; 
-            font-size: 11px; 
-            color: var(--text-dim); 
-            background: rgba(0,0,0,0.3); 
-            padding: 12px; 
-            border-radius: 10px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            min-height: 40px;
+        .game-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
         }
 
+        .game-card.selected { 
+            border-color: var(--accent);
+            background: rgba(74, 140, 255, 0.12);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .game-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            filter: grayscale(0.3);
+            transition: filter 0.3s;
+        }
+
+        .game-card.selected .game-icon {
+            filter: grayscale(0);
+        }
+
+        .game-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .game-card.selected .game-name {
+            color: var(--text-primary);
+        }
+
+        /* SPINNER */
         .spinner { 
-            width: 14px; height: 14px; 
-            border: 2px solid rgba(255,255,255,0.2); 
-            border-top: 2px solid white; 
-            border-radius: 50%; 
-            animation: spin 0.8s linear infinite; 
-            display: none; 
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin { 
+            to { transform: rotate(360deg); } 
+        }
+
+        /* LOG AREA */
+        .log-container { 
+            margin-top: 28px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            min-height: 60px;
+        }
+
+        .log-text {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-dim);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
     </style>
 </head>
 <body>
-    <div class="loader-card">
-        <h1>PROWLER</h1>
-        <div class="subtitle">Premium Online Dashboard</div>
-
-        <div class="conn-status" id="connStatus">
-            🟡 RECHERCHE DU LOGICIEL LOCAL...
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo">PROWLER</div>
+            <div class="subtitle">Premium Control Panel</div>
         </div>
 
-        <div class="user-info" id="userInfoSection">
+        <!-- CONNECTION STATUS -->
+        <div class="connection-status">
+            <div class="status-indicator" id="statusDot"></div>
+            <div class="status-text" id="statusText">Searching for local client...</div>
+        </div>
+
+        <!-- USER INFO -->
+        <div class="user-info">
             <div class="info-row">
-                <span>👤 Utilisateur</span>
-                <span id="displayUsername" style="font-weight: bold;">---</span>
+                <span class="info-label">👤 User</span>
+                <span class="info-value" id="username">---</span>
             </div>
             <div class="info-row">
-                <span>⚡ Système</span>
-                <span id="displayStatus">Hors-ligne</span>
+                <span class="info-label">⚡ Status</span>
+                <span class="status-badge badge-offline" id="systemStatus">Offline</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🔐 License</span>
+                <span class="info-value">Lifetime</span>
             </div>
         </div>
 
-        <div class="btn-stack">
+        <!-- DRIVER SECTION -->
+        <div class="action-section">
+            <div class="section-title">Kernel Driver</div>
             <button id="btnDriver" onclick="loadDriver()">
-                <div id="dotDriver" class="status-dot"></div>
-                <span id="textDriver">INITIALISER KERNEL</span>
+                <span id="textDriver">Load Driver</span>
                 <div id="spinDriver" class="spinner"></div>
             </button>
+        </div>
 
-            <div class="game-selector">
+        <!-- GAME SELECTION -->
+        <div class="action-section">
+            <div class="section-title">Select Game</div>
+            <div class="game-grid">
                 <div class="game-card" id="cardSot" onclick="selectGame('sot')">
-                    <div style="font-size: 20px;">🌊</div>
-                    <div style="font-size: 12px;">Sea of Thieves</div>
+                    <div class="game-icon">🌊</div>
+                    <div class="game-name">Sea of Thieves</div>
                 </div>
                 <div class="game-card" id="cardRust" onclick="selectGame('rust')">
-                    <div style="font-size: 20px;">🔫</div>
-                    <div style="font-size: 12px;">Rust</div>
+                    <div class="game-icon">🔫</div>
+                    <div class="game-name">Rust</div>
                 </div>
             </div>
+        </div>
 
+        <!-- INJECTION BUTTON -->
+        <div class="action-section">
+            <div class="section-title">Game Injection</div>
             <button id="btnInject" onclick="inject()" disabled>
-                <div id="dotInject" class="status-dot"></div>
-                <span id="textInject">CHOISIR UN JEU</span>
+                <span id="textInject">Select a game first</span>
                 <div id="spinInject" class="spinner"></div>
             </button>
         </div>
 
-        <div class="log-area" id="log">Lancez votre exécutable sur votre PC pour commencer.</div>
+        <!-- LOG AREA -->
+        <div class="log-container">
+            <div class="log-text" id="log">Launch the desktop client to begin.</div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="footer-text">Prowler © 2025 - Secure Injection System</div>
+        </div>
     </div>
 
     <script>
-        // Adresse locale même si le site est en ligne
         const API_BASE = "http://127.0.0.1:8080";
         let selectedGame = null;
         let isWaiting = false;
         let dots = 0;
 
-        // Boucle de mise à jour
         setInterval(updateStatus, 1000);
 
         async function updateStatus() {
             try {
-                // 'mode: cors' est crucial pour les sites publiés en ligne
                 const res = await fetch(`${API_BASE}/status`, { mode: 'cors' });
                 const data = await res.json();
 
-                document.getElementById('connStatus').innerText = "🟢 LOGICIEL CONNECTÉ";
-                document.getElementById('connStatus').style.color = "var(--success)";
-                document.getElementById('displayUsername').innerText = data.username || "Invité";
+                document.getElementById('statusDot').classList.add('online');
+                document.getElementById('statusDot').classList.remove('offline');
+                document.getElementById('statusText').innerText = "Connected to local client";
+                document.getElementById('username').innerText = data.username || "Guest";
 
                 if (data.driver_loaded) {
-                    document.getElementById('displayStatus').innerText = "Kernel Prêt";
-                    document.getElementById('displayStatus').style.color = "var(--success)";
-                    document.getElementById('dotDriver').classList.add('active-dot');
-                    document.getElementById('textDriver').innerText = "KERNEL CHARGÉ";
+                    document.getElementById('systemStatus').innerText = "Ready";
+                    document.getElementById('systemStatus').classList.remove('badge-offline');
+                    document.getElementById('systemStatus').classList.add('badge-success');
+                    document.getElementById('btnDriver').classList.add('loaded');
+                    document.getElementById('textDriver').innerText = "✓ Driver Loaded";
                     document.getElementById('spinDriver').style.display = 'none';
                 }
 
                 if (data.is_waiting_for_game) {
                     isWaiting = true;
                     dots = (dots + 1) % 4;
-                    document.getElementById('textInject').innerText = "ATTENTE DU JEU" + ".".repeat(dots);
-                    document.getElementById('dotInject').className = "status-dot waiting-dot";
+                    document.getElementById('textInject').innerText = "Waiting for game" + ".".repeat(dots);
+                    document.getElementById('btnInject').classList.add('waiting');
                     document.getElementById('spinInject').style.display = 'block';
                 } else if (isWaiting && !data.is_waiting_for_game) {
                     isWaiting = false;
-                    document.getElementById('textInject').innerText = "SYSTÈME ACTIF";
-                    document.getElementById('dotInject').className = "status-dot active-dot";
+                    document.getElementById('textInject').innerText = "✓ Injected";
+                    document.getElementById('btnInject').classList.remove('waiting');
+                    document.getElementById('btnInject').classList.add('loaded');
                     document.getElementById('spinInject').style.display = 'none';
                 }
             } catch (e) {
-                document.getElementById('connStatus').innerText = "🔴 LOGICIEL LOCAL NON DÉTECTÉ";
-                document.getElementById('connStatus').style.color = "var(--error)";
-                document.getElementById('displayStatus').innerText = "Hors-ligne";
-                document.getElementById('displayStatus').style.color = "var(--text-dim)";
+                document.getElementById('statusDot').classList.add('offline');
+                document.getElementById('statusDot').classList.remove('online');
+                document.getElementById('statusText').innerText = "Local client not detected";
+                document.getElementById('systemStatus').innerText = "Offline";
+                document.getElementById('systemStatus').classList.add('badge-offline');
+                document.getElementById('systemStatus').classList.remove('badge-success');
             }
         }
 
@@ -250,21 +519,26 @@
             document.querySelectorAll('.game-card').forEach(c => c.classList.remove('selected'));
             document.getElementById(game === 'sot' ? 'cardSot' : 'cardRust').classList.add('selected');
             document.getElementById('btnInject').disabled = false;
-            document.getElementById('textInject').innerText = "INJECTER " + game.toUpperCase();
+            document.getElementById('textInject').innerText = "Inject " + game.toUpperCase();
+            document.getElementById('log').innerText = `${game === 'sot' ? 'Sea of Thieves' : 'Rust'} selected. Click inject to proceed.`;
         }
 
         async function loadDriver() {
             document.getElementById('spinDriver').style.display = 'block';
+            document.getElementById('log').innerText = "Loading kernel driver...";
             try {
                 await fetch(`${API_BASE}/load_driver`, { method: 'POST', mode: 'cors' });
+                document.getElementById('log').innerText = "Driver load request sent successfully.";
             } catch (e) {
-                document.getElementById('log').innerText = "Erreur : Impossible de joindre le logiciel local.";
+                document.getElementById('log').innerText = "Error: Unable to communicate with local client.";
+                document.getElementById('spinDriver').style.display = 'none';
             }
         }
 
         async function inject() {
             if (!selectedGame) return;
             document.getElementById('spinInject').style.display = 'block';
+            document.getElementById('log').innerText = `Sending injection request for ${selectedGame}...`;
             
             try {
                 const res = await fetch(`${API_BASE}/inject`, {
@@ -275,10 +549,13 @@
                 });
                 const data = await res.json();
                 if (data.status === 'waiting') {
-                    document.getElementById('log').innerText = "Ordre reçu. En attente du lancement du jeu...";
+                    document.getElementById('log').innerText = "Waiting for game to launch...";
+                } else if (data.status === 'success') {
+                    document.getElementById('log').innerText = "✓ Successfully injected! Press INSERT to open menu.";
                 }
             } catch (e) {
-                document.getElementById('log').innerText = "Erreur de communication avec le bridge.";
+                document.getElementById('log').innerText = "Error: Bridge communication failed.";
+                document.getElementById('spinInject').style.display = 'none';
             }
         }
     </script>
